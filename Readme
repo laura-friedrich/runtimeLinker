@@ -1,42 +1,5 @@
 Assignment 4
-
-
-CFLAGS= -Wall -pedantic
-
-.PHONY: all
-all: self-linker
-
-self-linker: self-linker.o
-	gcc -g -o $@ $^
-
-%.o: %.c
-	gcc $(CFLAGS) -c -o $@ $^
-
-.PHONY: clean
-clean:
-	rm -f self-linker self-linker.o
-
-
-
-
-
-
-
-
-
-
-  self-linker: self-linker.c
-  	gcc -Wall -pedantic -g -o self-linker self-linker.c -ldl
-
-  .PHONY: clean
-  clean:
-  	rm -f self-linker
-
-
-
-
-
-
-
+Laura Friedrich and Henry Mound
 
 -https://dwheeler.com/program-library/Program-Library-HOWTO/x172.html
+-https://www.tutorialspoint.com/cprogramming/c_constants.htm

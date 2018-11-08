@@ -8,28 +8,30 @@ extern void *_GLOBAL_OFFSET_TABLE_;
 
 int main (int argc, char *argv[]){
 
-  puts("hello");
-
   void *handle;
   void *putsSym;
-  handle= dlopen("/usr/lib/libc.so.6", RTLD_LAZY);
-  putsSym= dlsym(handle, "puts");
-  printf("putsSym is %p\n" , putsSym);
-  printf("putsSym is %p\n" , &putsSym);
+  handle= dlopen("/usr/lib/libc.so.6", RTLD_NOW); //Open lib where puts is located
+  if (!handle) {
+    fprintf(stderr, "%s\n", dlerror());
+    exit(EXIT_FAILURE);
+  }
 
-  //(char *) &_GLOBAL_OFFSET_TABLE_ + 2 = putsSym;
+  putsSym= dlsym(handle, "puts"); //a pointer to where puts is located in memory
 
+  if (!putsSym) {
+    fprintf(stderr, "%s\n", dlerror());
+    exit(EXIT_FAILURE);
+  }
 
-  printf("My _GLOBAL_OFFSET_TABLE_ is %p\n" , _GLOBAL_OFFSET_TABLE_);
-  printf("This is located at %p\n", &_GLOBAL_OFFSET_TABLE_);
+  void **addressOfPutsInGOT = &_GLOBAL_OFFSET_TABLE_+3; //a pointer to where puts is in GOT
+  *addressOfPutsInGOT= putsSym; //placing the pointer to puts in the GOT
 
-  printf("The next element is %p\n", _GLOBAL_OFFSET_TABLE_ +1);
-  printf("This next element is located at %p\n", &_GLOBAL_OFFSET_TABLE_+1);
-
-  puts("hello");
+  puts("hello");  //Calling puts
   puts("world");
 
-  dlclose(handle);
-
+  if (dlclose(handle) != 0) {
+    fprintf(stderr, "%s\n", dlerror());
+    exit(EXIT_FAILURE);
+  }
   return 0;
 }

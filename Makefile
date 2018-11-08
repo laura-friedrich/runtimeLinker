@@ -1,12 +1,12 @@
 
 
-CFLAGS= -Wall -pedantic
+CFLAGS= -Wall -pedantic -g
 
 .PHONY: all
 	all: self-linker
 
 self-linker: self-linker.o
-	gcc -g -o $@ $^ -ldl
+	gcc -o $@ $^ -ldl
 
 %.o: %.c
 	gcc $(CFLAGS) -c -o $@ $^
