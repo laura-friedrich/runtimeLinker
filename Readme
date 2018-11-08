@@ -3,3 +3,152 @@ Laura Friedrich and Henry Mound
 
 -https://dwheeler.com/program-library/Program-Library-HOWTO/x172.html
 -https://www.tutorialspoint.com/cprogramming/c_constants.htm
+
+
+
+
+
+
+
+Script started on 2018-11-08 16:42:05-05:00
+]0;lfriedrich@middlinux:~/cs315/assignment4[lfriedrich@middlinux assignment4]$ make
+gcc -Wall -pedantic -g -c -o self-linker.o self-linker.c
+gcc -o self-linker self-linker.o -ldl
+]0;lfriedrich@middlinux:~/cs315/assignment4[lfriedrich@middlinux assignment4]$ gdb self-linker
+GNU gdb (GDB) 8.2
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-pc-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from self-linker...done.
+
+//Breaking before the first call to puts. This is before puts would have been
+//dynamically linked by the computer itself. Thus, if it does not get linked
+//when puts is called, then we know we have implemented the self-linking correctly.
+
+(gdb) break 29
+Breakpoint 1 at 0x1252: file self-linker.c, line 29.
+(gdb) run
+Starting program: /home/lfriedrich/cs315/assignment4/self-linker
+
+//Looking in main to see that puts has not been called previously and thus has
+//not been linked.
+
+Breakpoint 1, main (argc=1, argv=0x7fffffffe778) at self-linker.c:29
+29	  puts("hello");  //Calling puts
+(gdb) disas
+Dump of assembler code for function main:
+   0x0000555555555199 <+0>:	push   %rbp
+   0x000055555555519a <+1>:	mov    %rsp,%rbp
+   0x000055555555519d <+4>:	sub    $0x30,%rsp
+   0x00005555555551a1 <+8>:	mov    %edi,-0x24(%rbp)
+   0x00005555555551a4 <+11>:	mov    %rsi,-0x30(%rbp)
+   0x00005555555551a8 <+15>:	mov    $0x2,%esi
+   0x00005555555551ad <+20>:	lea    0xe50(%rip),%rdi        # 0x555555556004
+   0x00005555555551b4 <+27>:	callq  0x555555555050 <dlopen@plt>
+   0x00005555555551b9 <+32>:	mov    %rax,-0x18(%rbp)
+   0x00005555555551bd <+36>:	cmpq   $0x0,-0x18(%rbp)
+   0x00005555555551c2 <+41>:	jne    0x5555555551f1 <main+88>
+   0x00005555555551c4 <+43>:	callq  0x555555555090 <dlerror@plt>
+   0x00005555555551c9 <+48>:	mov    %rax,%rdx
+   0x00005555555551cc <+51>:	mov    0x2e8d(%rip),%rax        # 0x555555558060 <stderr@@GLIBC_2.2.5>
+   0x00005555555551d3 <+58>:	lea    0xe3d(%rip),%rsi        # 0x555555556017
+   0x00005555555551da <+65>:	mov    %rax,%rdi
+   0x00005555555551dd <+68>:	mov    $0x0,%eax
+   0x00005555555551e2 <+73>:	callq  0x555555555040 <fprintf@plt>
+   0x00005555555551e7 <+78>:	mov    $0x1,%edi
+   0x00005555555551ec <+83>:	callq  0x555555555070 <exit@plt>
+   0x00005555555551f1 <+88>:	mov    -0x18(%rbp),%rax
+   0x00005555555551f5 <+92>:	lea    0xe1f(%rip),%rsi        # 0x55555555601b
+   0x00005555555551fc <+99>:	mov    %rax,%rdi
+   0x00005555555551ff <+102>:	callq  0x555555555080 <dlsym@plt>
+   0x0000555555555204 <+107>:	mov    %rax,-0x10(%rbp)
+   0x0000555555555208 <+111>:	cmpq   $0x0,-0x10(%rbp)
+   0x000055555555520d <+116>:	jne    0x55555555523c <main+163>
+   0x000055555555520f <+118>:	callq  0x555555555090 <dlerror@plt>
+   0x0000555555555214 <+123>:	mov    %rax,%rdx
+   0x0000555555555217 <+126>:	mov    0x2e42(%rip),%rax        # 0x555555558060 <stderr@@GLIBC_2.2.5>
+--Type <RET> for more, q to quit, c to continue without paging--
+   0x000055555555521e <+133>:	lea    0xdf2(%rip),%rsi        # 0x555555556017
+   0x0000555555555225 <+140>:	mov    %rax,%rdi
+   0x0000555555555228 <+143>:	mov    $0x0,%eax
+   0x000055555555522d <+148>:	callq  0x555555555040 <fprintf@plt>
+   0x0000555555555232 <+153>:	mov    $0x1,%edi
+   0x0000555555555237 <+158>:	callq  0x555555555070 <exit@plt>
+   0x000055555555523c <+163>:	lea    0x2dd5(%rip),%rax        # 0x555555558018 <puts@got.plt>
+   0x0000555555555243 <+170>:	mov    %rax,-0x8(%rbp)
+   0x0000555555555247 <+174>:	mov    -0x8(%rbp),%rax
+   0x000055555555524b <+178>:	mov    -0x10(%rbp),%rdx
+   0x000055555555524f <+182>:	mov    %rdx,(%rax)
+=> 0x0000555555555252 <+185>:	lea    0xdc7(%rip),%rdi        # 0x555555556020
+   0x0000555555555259 <+192>:	callq  0x555555555030 <puts@plt>
+   0x000055555555525e <+197>:	lea    0xdc1(%rip),%rdi        # 0x555555556026
+   0x0000555555555265 <+204>:	callq  0x555555555030 <puts@plt>
+   0x000055555555526a <+209>:	mov    -0x18(%rbp),%rax
+   0x000055555555526e <+213>:	mov    %rax,%rdi
+   0x0000555555555271 <+216>:	callq  0x555555555060 <dlclose@plt>
+   0x0000555555555276 <+221>:	test   %eax,%eax
+   0x0000555555555278 <+223>:	je     0x5555555552a7 <main+270>
+   0x000055555555527a <+225>:	callq  0x555555555090 <dlerror@plt>
+   0x000055555555527f <+230>:	mov    %rax,%rdx
+   0x0000555555555282 <+233>:	mov    0x2dd7(%rip),%rax        # 0x555555558060 <stderr@@GLIBC_2.2.5>
+   0x0000555555555289 <+240>:	lea    0xd87(%rip),%rsi        # 0x555555556017
+   0x0000555555555290 <+247>:	mov    %rax,%rdi
+   0x0000555555555293 <+250>:	mov    $0x0,%eax
+   0x0000555555555298 <+255>:	callq  0x555555555040 <fprintf@plt>
+   0x000055555555529d <+260>:	mov    $0x1,%edi
+   0x00005555555552a2 <+265>:	callq  0x555555555070 <exit@plt>
+   0x00005555555552a7 <+270>:	mov    $0x0,%eax
+   0x00005555555552ac <+275>:	leaveq
+--Type <RET> for more, q to quit, c to continue without paging--
+   0x00005555555552ad <+276>:	retq
+
+//Stepping two instructions to call the function puts
+
+End of assembler dump.
+(gdb) si
+0x0000555555555259	29	  puts("hello");  //Calling puts
+(gdb) si
+0x0000555555555030 in puts@plt ()
+
+//Now we are in the PLT at the puts function. we see that we will jump to the got
+//at puts. Here, if we have implemented the self-linker correctly, after jumping
+//to the GOT, the address contained in the GOT will be the address where puts is
+//located in memory. Thus, we will jump directly to the function puts and not
+//have to link
+
+(gdb) disas
+Dump of assembler code for function puts@plt:
+=> 0x0000555555555030 <+0>:	jmpq   *0x2fe2(%rip)        # 0x555555558018 <puts@got.plt>
+   0x0000555555555036 <+6>:	pushq  $0x0
+   0x000055555555503b <+11>:	jmpq   0x555555555020
+End of assembler dump.
+(gdb) si
+
+//We now see that we imedietly jumped to the puts function in libc thus we
+//know we implemented the self-linker correctly
+
+0x00007ffff7e5da40 in puts () from /usr/lib/libc.so.6
+(gdb) continur[Ke
+
+//we continue the program and see that puts prints out hello world.
+
+Continuing.
+hello
+world
+[Inferior 1 (process 6918) exited normally]
+(gdb) q
+]0;lfriedrich@middlinux:~/cs315/assignment4[lfriedrich@middlinux assignment4]$ exit
+exit
+
+Script done on 2018-11-08 16:44:18-05:00
